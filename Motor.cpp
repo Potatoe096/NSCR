@@ -1,5 +1,7 @@
- //Como comenzar?
- 
+/* =========================================================================
+   Alles Anfag ist schwer (Todo comienzo es dificil)
+   ========================================================================= */
+
  // Primero las librerias
     // #
     // # 
@@ -118,68 +120,127 @@ MotorBTS motorTI = { 6,  7, 26, 27}; // Trasero Izquierdo   (TI)
 MotorBTS motorTD = { 8,  9, 28, 29}; // Trasero Derecho     (TD)
 
 
+// Funciones para mover el motor
+void moverMotor(MotorBTS motor, int velocidad) 
+{
+  // Aseguramos que la velocidad esté dentro del rango permitido
+  velocidad = constrain(velocidad, -255, 255);
 
-/* =========================================================================
-  Funciones elementales
-   ========================================================================= */
+  if (velocidad > 0) 
+  {
+    // Giro a la derecha / Avanzar
+    analogWrite(motor.rPwmPin, velocidad);
+    analogWrite(motor.lPwmPin, 0);
+  } 
+  
+  else if (velocidad < 0) {
+    // Giro a la izquierda / Retroceder
+    analogWrite(motor.rPwmPin, 0);
+    analogWrite(motor.lPwmPin, abs(velocidad)); // abs() convierte el valor a positivo
+  } else {
+    // Parar
+    analogWrite(motor.rPwmPin, 0);
+    analogWrite(motor.lPwmPin, 0);
+  }
+}
+
+// Configuración de pines de un motor individual
+void inicializarMotor(MotorBTS motor) {
+  pinMode(motor.rPwmPin, OUTPUT);
+  pinMode(motor.lPwmPin, OUTPUT);
+  pinMode(motor.rEnPin, OUTPUT);
+  pinMode(motor.lEnPin, OUTPUT);
+
+  // Activamos los pines de habilitación (Enable) en HIGH permanentemente
+  // Los pines Enable sirven como una puerta para la corriente, si no están activos la señal no llegará
+  digitalWrite(motor.rEnPin, HIGH);
+  digitalWrite(motor.lEnPin, HIGH);
+}
+
+
+//Funciones elementales
+
 // La estructura basica seria:
         // mover el motor (motor, velocidad(+ avanza, - retrocede, 0 quieto))
     
 // Dandoles un valor de velocidad, los motores debrrian de hacer el nombre de cada función 
-int velocidad = //(la velocidad debe ser entre 0 y 255)
+
         
-   void Avanzar (int velocidad)
-   {
+void Avanzar (int velocidad)
+{
       
-        MotorDI(motorDI, +velocidad)
-        MotorDD(motorDD, +velocidad)
-        MotorTI(motorDD, +velocidad)
-        MotorTD(motorDD, +velocidad) 
+  moverMotor(motorDI, velocidad);
+  moverMotor(motorDD, velocidad);
+  moverMotor(motorDD, velocidad);
+  moverMotor(motorDD, velocidad);
         
-   }
+}
 
-   void Retroceder(int velocidad)
-   {
-        MotorDI(motorDI, -velocidad)
-        MotorDD(motorDD, -velocidad)
-        MotorTI(motorTI, -velocidad)
-        MotorTD(motorTD, -velocidad)
-   }
+void Retroceder(int velocidad)
+{
+    moverMotor(motorDI, -velocidad);
+    moverMotor(motorDD, -velocidad);
+    moverMotor(motorTI, -velocidad);
+    moverMotor(motorTD, -velocidad);
+}
 
- void Detenerse(int velocidad)
-   {
-        MotorDI(motorDI, 0)
-        MotorDD(motorDD, 0)
-        MotorTI(motorDD, 0)
-        MotorTD(motorDD, 0)
-   }
+// Para detenerse no hace falta ni siquiera pasar argumentos
+void Detenerse()
+{
+  moverMotor(motorDI, 0);
+  moverMotor(motorDD, 0);
+  moverMotor(motorDD, 0);
+  moverMotor(motorDD, 0);
+}
 
 // Para girar hacia un lado, las llantas de ese lado, se deberian de parar, asi sirven de eje y  las otras llantas lo hacen girar hacia ese lado
 // Se me ocurre tambien girar más lento para tener mejor control (velocidad/2)
+// Otra idea seria girar con velocidad contraria las otras llantas, para no desplazar tanto el carro al girar.
 
-   void Giro_derecha(int velocidad)
-   {
-        MotorDI(motorDI, +velocidad)
-        MotorDD(motorDD, 0)
-        MotorTI(motorTI, +velocidad)
-        MotorTD(motorTD, 0)
-   }
+void Giro_derecha(int velocidad)
+{
+  moverMotor(motorDI, velocidad);
+  moverMotor(motorDD, 0);
+  moverMotor(motorTI, velocidad);
+  moverMotor(motorTD, 0);
+}
 
-   void Giro_izquierda(int velocidad)
-   {
-        MotorDI(motorDI, 0)
-        MotorDD(motorDD, +velocidad)
-        MotorTI(motorTI, 0)
-        MotorTD(motorTD, +velocidad)
-   }
+void Giro_izquierda(int velocidad)
+{
+  moverMotor(motorDI, 0);
+  moverMotor(motorDD, velocidad);
+  moverMotor(motorTI, 0);
+  moverMotor(motorTD, velocidad);
+}
 
-   /* =========================================================================
-  Void Set up
-   ========================================================================= */
-// Nada con respecto a esto
+   
+// Void Set up y void loop
+void setup() 
+{
+  // Inicializamos cada uno de los 4 motores
+  inicializarMotor(motorDI);
+  inicializarMotor(motorDD);
+  inicializarMotor(motorTI);
+  inicializarMotor(motorTD);
+}
 
+void loop() 
+{
+  // Ejemplo: Aceleración progresiva hacia adelante
+  for (int speed = 0; speed <= 255; speed++) {
+    Avanzar(speed);
+    delay(20);
+  }
 
+  delay(2000); // Mantener avance 2 segundos
 
-/* =========================================================================
-  Void loop
-   ========================================================================= */
+  Detenerse();
+  delay(1000);
+
+  // Ejemplo: Giro sobre su propio eje a la derecha
+  Giro_derecha(180);
+  delay(1500);
+
+  Detenerse();
+  delay(2000);
+}
