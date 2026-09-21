@@ -121,10 +121,10 @@ MotorBTS motorTD = { 8,  9, 28, 29}; // Trasero Derecho     (TD)
 
 
 // Funciones para mover el motor
+
 void moverMotor(MotorBTS motor, int velocidad) 
 {
-  // Aseguramos que la velocidad esté dentro del rango permitido
-  velocidad = constrain(velocidad, -255, 255);
+  
 
   if (velocidad > 0) 
   {
@@ -226,7 +226,7 @@ void setup()
 
 void loop() 
 {
-  // Ejemplo: Aceleración progresiva hacia adelante
+  // Ejemplo: Aceleración progresiva hacia adelante (manteniendo la velocida en un rango de 0 a 255)
   for (int speed = 0; speed <= 255; speed++) {
     Avanzar(speed);
     delay(20);
@@ -237,9 +237,22 @@ void loop()
   Detenerse();
   delay(1000);
 
-  // Ejemplo: Giro sobre su propio eje a la derecha
+  Retroceder(100);
+
+  delay(2000);
+
+  Detenerse();
+  delay(1000);
+
+  // Ejemplo: Giro sobre su propio eje a la derecha e izquierda
   Giro_derecha(180);
   delay(1500);
+
+  delay(2000);
+
+  Giro_izquierda(180);
+  delay(1500);
+
 
   Detenerse();
   delay(2000);
