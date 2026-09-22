@@ -1,0 +1,46 @@
+Comandos útiles desde la terminal
+------------------------------------------------------------------------------------------------
+
+Ramas
+
+    git checkout -b exmple_branch // Crea una rama 
+
+Clonar un repositorio a una carpeta local
+
+    git clone <Github_url>
+
+Descargar los avances de una rama a la carpeta local
+
+    git pull
+
+Añadir cambios a un commit
+
+    git add . // Esto añade todos los cambios
+    git add [Nombre del archivo(s) donde se realizó el cambio]
+
+Hacer un commit
+
+    git commit -m "your message" // hace un commit
+    git commit --amend -m "message" // Le añade cambios al commit
+
+Subir los commits hechos a un repositorio
+
+    git push
+    git push --set-upstream origin master //especifica la branch
+
+Deshacer
+
+    git reset --soft Head~1 // Elimina lo que tengas en el commit manteniendo cambios en local
+    git reset --hard Head~1 // Elimina lo que tengas en el commit y lo elimina del local
+
+Buscar y deshacer un commit
+
+    git log // Desglosa una bitacora con todos los commits hechos al repo
+    git revert (identificador del commit) // Revierte un commit 
+
+Revisiones
+
+    git checkout main // Revisa si estas en la rama indicada
+    git status // Revision del status del commit actual
+    git log // Desglosa una bitacora con todos los commits hechos al repo
+
