@@ -257,3 +257,138 @@ void loop()
   Detenerse();
   delay(2000);
 }
+
+/* =========================================================================
+   CONTROL DE 4 MOTORES CON 2 DRIVERS BTS7960 (1 Driver por cada Lado)
+   ========================================================================= */
+
+// Estructura para agrupar los pines de un driver BTS7960
+struct DriverBTS {
+  int rPwmPin; // Giro Adelante (PWM)
+  int lPwmPin; // Giro Atrás (PWM)
+  int rEnPin;  // Enable Derecha (Digital)
+  int lEnPin;  // Enable Izquierda (Digital)
+};
+
+// --- CONFIGURACIÓN DE PINES ---
+// Driver 1: Maneja Lado Izquierdo (Motores Delantero Izquierdo + Trasero Izquierdo en paralelo)
+DriverBTS driverIzquierdo = {2, 3, 22, 23};
+
+// Driver 2: Maneja Lado Derecho (Motores Delantero Derecho + Trasero Derecho en paralelo)
+DriverBTS driverDerecho   = {4, 5, 24, 25};
+
+
+// --- FUNCIONES DE CONTROL DE DRIVER ---
+
+void moverLado(DriverBTS driver, int velocidad) {
+  if (velocidad > 0) {
+    // Avanzar
+    analogWrite(driver.rPwmPin, velocidad);
+    analogWrite(driver.lPwmPin, 0);
+  } 
+  else if (velocidad < 0) {
+    // Retroceder
+    analogWrite(driver.rPwmPin, 0);
+    analogWrite(driver.lPwmPin, abs(velocidad));
+  } 
+  else {
+    // Frenar / Detener
+    analogWrite(driver.rPwmPin, 0);
+    analogWrite(driver.lPwmPin, 0);
+  }
+}
+
+void inicializarDriver(DriverBTS driver) {
+  pinMode(driver.rPwmPin, OUTPUT);
+  pinMode(driver.lPwmPin, OUTPUT);
+  pinMode(driver.rEnPin, OUTPUT);
+  pinMode(driver.lEnPin, OUTPUT);
+
+  // Habilitar el driver permanentemente
+  digitalWrite(driver.rEnPin, HIGH);
+  digitalWrite(driver.lEnPin, HIGH);
+}
+
+
+// --- MOVIMIENTOS BÁSICOS DEL VEHÍCULO ---
+
+void Avanzar(int velocidad) 
+{
+  moverLado(driverIzquierdo, velocidad);
+  moverLado(driverDerecho, velocidad);
+}
+
+void Retroceder(int velocidad) 
+{
+  moverLado(driverIzquierdo, -velocidad);
+  moverLado(driverDerecho, -velocidad);
+}
+
+void Detenerse() 
+{
+  moverLado(driverIzquierdo, 0);
+  moverLado(driverDerecho, 0);
+}
+
+// Giro normal(un lado parado y el otro avanza)
+void Giro_derecha(int velocidad) {
+  moverLado(driverIzquierdo, velocidad);
+  moverLado(driverDerecho, 0);
+}
+
+void Giro_izquierda(int velocidad) {
+  moverLado(driverIzquierdo, 0);
+  moverLado(driverDerecho, velocidad);
+}
+
+// Giro sobre su propio eje (Lados giran en sentidos opuestos-Falta probar)
+void Giro_Eje_Derecha(int velocidad) {
+  moverLado(driverIzquierdo, velocidad);
+  moverLado(driverDerecho, -velocidad);
+}
+
+void Giro_Eje_Izquierda(int velocidad) {
+  moverLado(driverIzquierdo, -velocidad);
+  moverLado(driverDerecho, velocidad);
+}
+
+
+// --- SETUP Y LOOP ---
+
+void setup() {
+  // Solo inicializamos 2 drivers en lugar de 4
+  inicializarDriver(driverIzquierdo);
+  inicializarDriver(driverDerecho);
+}
+
+void loop() {
+  // Aceleración progresiva hacia adelante
+  for (int speed = 0; speed <= 255; speed++) {
+    Avanzar(speed);
+    delay(20);
+  }
+
+  delay(2000); // Mantener avance 2 segundos
+
+  Detenerse();
+  delay(1000);
+
+  Retroceder(100);
+  delay(2000);
+
+  Detenerse();
+  delay(1000);
+
+  // Giro a la derecha y sobre su propio eje izquierda
+  Giro_derecha(180);
+  delay(1500);
+
+  Detenerse();
+  delay(1000);
+
+  Giro_Eje_Izquierda(180);
+  delay(1500);
+
+  Detenerse();
+  delay(2000);
+}
